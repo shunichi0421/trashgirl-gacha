@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const indices = getRandomIndices(drawCount, imageCount);
 
     indices.forEach(i => {
-      const imgPath = `https://firebasestorage.googleapis.com/v0/b/trash-girl-2c99d.appspot.com/o/images%2Fimg-${i}.png?alt=media`;
+      const imgPath = `https://firebasestorage.googleapis.com/v0/b/trash-girl-2c99d.firebasestorage.app/o/images%2Fimg-${i}.png?alt=media`;
       const filename = `img_${i}.png`;
       currentImages.push({ path: imgPath, name: filename });
 
