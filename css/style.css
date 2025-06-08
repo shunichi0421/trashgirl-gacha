@@ -1,0 +1,110 @@
+body {
+  background-color: #0f0f0f;
+  color: #fff;
+  font-family: 'Helvetica Neue', sans-serif;
+  margin: 0;
+  padding: 1em;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 0.5em;
+  color: #ff69b4;
+}
+
+.description {
+  font-size: 0.9em;
+  color: #ccc;
+  margin-bottom: 1.5em;
+}
+
+button {
+  background-color: #e91e63;
+  color: white;
+  font-size: 1.1em;
+  padding: 0.8em 1.5em;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 1.5em;
+}
+
+button:hover {
+  background-color: #d81b60;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1em;
+}
+
+.image-box {
+  background-color: #1e1e1e;
+  padding: 0.5em;
+  border-radius: 10px;
+  position: relative;
+}
+
+.image-box img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.image-box .note {
+  font-size: 0.75em;
+  color: #aaa;
+  margin: 0.3em 0;
+}
+
+.dl-btn {
+  display: inline-block;
+  font-size: 0.7em;
+  padding: 0.3em 0.6em;
+  color: #fff;
+  background: #444;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.dl-btn:hover {
+  background: #666;
+}
+
+#downloadAllBtn {
+  background-color: #2196f3;
+  color: white;
+  font-size: 1em;
+  padding: 0.8em 1.5em;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 2em;
+}
+
+#downloadAllBtn:hover {
+  background-color: #1976d2;
+}
+
+.dl-btn {
+  display: inline-block;
+  margin-top: 0.3em;
+  padding: 0.3em 0.8em;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.dl-btn:hover {
+  background: #666;
+}

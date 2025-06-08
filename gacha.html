@@ -1,0 +1,29 @@
+<script>
+  async function checkToken() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (!token) {
+      alert("不正なアクセスです。");
+      window.location.href = "index.html";
+      return;
+    }
+
+    const res = await fetch("data/tokens.json");
+    const tokens = await res.json();
+
+    if (!tokens[token]) {
+      alert("このリンクはすでに使われています。");
+      window.location.href = "index.html";
+      return;
+    }
+
+    // ✅ トークンが有効 → ガチャ許可
+    // ここで UI 初期化 or 表示を進める
+
+    // ✅ トークンを失効させる処理（開発環境ならローカル更新、実運用では要サーバー対応）
+    // → GitHub Pagesではこの処理は省略し、ワンタイムDL形式や時間制限で代用可能
+  }
+
+  window.addEventListener("DOMContentLoaded", checkToken);
+</script>
