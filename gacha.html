@@ -1,29 +1,192 @@
-<script>
-  async function checkToken() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trash Girl ガチャ</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <h1>Trash Girl ガチャ</h1>
+  <button id="gachaBtn">ガチャを引く</button>
+  <div id="result" class="result"></div>
+  <button id="downloadAllBtn" style="display:none;">10枚まとめて保存</button>
 
-    if (!token) {
-      alert("不正なアクセスです。");
-      window.location.href = "index.html";
-      return;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCe_aJmH5VfFH3H5HLanK8ebFEIcIrFD3I",
+      authDomain: "trash-girl-2c99d.firebaseapp.com",
+      projectId: "trash-girl-2c99d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const imageCount = 10;
+    const drawCount = 10;
+    let currentImages = [];
+
+    function getRandomIndices(count, max) {
+      const indices = new Set();
+      while (indices.size < count) {
+        const rand = Math.floor(Math.random() * max) + 1;
+        indices.add(rand);
+      }
+      return Array.from(indices);
     }
 
-    const res = await fetch("data/tokens.json");
-    const tokens = await res.json();
+    document.getElementById("gachaBtn").addEventListener("click", () => {
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+      currentImages = [];
 
-    if (!tokens[token]) {
-      alert("このリンクはすでに使われています。");
-      window.location.href = "index.html";
-      return;
+      const indices = getRandomIndices(drawCount, imageCount);
+      indices.forEach(i => {
+        const imgPath = `https://firebasestorage.googleapis.com/v0/b/trash-girl-2c99d.appspot.com/o/images%2Fimg-${i}.png?alt=media`;
+        const filename = `img_${i}.png`;
+        currentImages.push({ path: imgPath, name: filename });
+
+        const box = document.createElement("div");
+        box.className = "image-box";
+
+        const img = document.createElement("img");
+        img.src = imgPath;
+        img.alt = `Trash Girl ${i}`;
+
+        const note = document.createElement("div");
+        note.className = "note";
+        note.textContent = "↓ 保存または長押し保存";
+
+        const dlBtn = document.createElement("button");
+        dlBtn.textContent = "保存";
+        dlBtn.className = "dl-btn";
+        dlBtn.addEventListener("click", async () => {
+          try {
+            const res = await fetch(imgPath);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          } catch (e) {
+            alert("画像の保存に失敗しました。");
+            console.error(e);
+          }
+        });
+
+        box.appendChild(img);
+        box.appendChild(note);
+        box.appendChild(dlBtn);
+        resultDiv.appendChild(box);
+      });
+
+      document.getElementById("downloadAllBtn").style.display = "block";
+    });
+
+    document.getElementById("downloadAllBtn").addEventListener("click", async () => {
+      try {
+        const zip = new JSZip();
+        const folder = zip.folder("TrashGirl");
+        for (const item of currentImages) {
+          const res = await fetch(item.path);
+          const blob = await res.blob();
+          folder.file(item.name, blob);
+        }
+        const content = await zip.generateAsync({ type: "blob" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = "TrashGirl_Gacha.zip";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch (e) {
+        alert("ZIP保存に失敗しました。");
+        console.error(e);
+      }
+    });
+
+    // 🔐 トークンの検証と使用処理
+    async function verifyTokenAndRunGacha() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+
+      if (!token) {
+        document.body.innerHTML = "<h2>トークンが見つかりません</h2>";
+        return;
+      }
+
+      const tokenRef = doc(db, "tokens", token);
+      const tokenSnap = await getDoc(tokenRef);
+
+      if (!tokenSnap.exists()) {
+        document.body.innerHTML = "<h2>無効なトークンです</h2>";
+        return;
+      }
+
+      const tokenData = tokenSnap.data();
+      if (tokenData.used) {
+        document.body.innerHTML = "<h2>このトークンはすでに使用されています</h2>";
+        return;
+      }
+
+      await updateDoc(tokenRef, { used: true });
+      document.getElementById("gachaBtn").click();
     }
 
-    // ✅ トークンが有効 → ガチャ許可
-    // ここで UI 初期化 or 表示を進める
+    verifyTokenAndRunGacha();
+  </script>
 
-    // ✅ トークンを失効させる処理（開発環境ならローカル更新、実運用では要サーバー対応）
-    // → GitHub Pagesではこの処理は省略し、ワンタイムDL形式や時間制限で代用可能
-  }
-
-  window.addEventListener("DOMContentLoaded", checkToken);
-</script>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      margin: 1em;
+      background: #111;
+      color: #fff;
+      text-align: center;
+    }
+    .result {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .image-box {
+      margin: 10px;
+      background: #222;
+      border-radius: 10px;
+      padding: 10px;
+      width: 45%;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    .note {
+      font-size: 0.8em;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #28a;
+      color: #fff;
+      font-weight: bold;
+    }
+    @media (min-width: 768px) {
+      .image-box {
+        width: 30%;
+      }
+    }
+  </style>
+</body>
+</html>
