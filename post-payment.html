@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>決済完了 - Trash Girl ガチャ</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCe_aJmH5VfFH3H5HLanK8ebFEIcIrFD3I",
+      authDomain: "trash-girl-2c99d.firebaseapp.com",
+      projectId: "trash-girl-2c99d",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function redirectToGacha() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get("session_id");
+
+      if (!sessionId) {
+        document.body.innerHTML = "<h2>セッション情報が見つかりません</h2>";
+        return;
+      }
+
+      // Firestore から token を取得
+      const tokensRef = collection(db, "tokens");
+      const q = query(tokensRef, where("sessionId", "==", sessionId));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        document.body.innerHTML = "<h2>トークンが見つかりませんでした</h2>";
+        return;
+      }
+
+      let token;
+      snapshot.forEach(doc => {
+        token = doc.id;
+      });
+
+      // gacha.html にリダイレクト
+      window.location.href = `gacha.html?token=${token}`;
+    }
+
+    redirectToGacha();
+  </script>
+</head>
+<body>
+  <h2>処理中です。ガチャページに移動します…</h2>
+</body>
+</html>
